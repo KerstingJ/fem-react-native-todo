@@ -12,6 +12,8 @@ import {
   TouchableHighlight
 } from "react-native-gesture-handler";
 
+import { BASE_URL } from "../../config";
+
 let { height, width } = Dimensions.get("window");
 
 export default class Todo extends Component {
@@ -29,14 +31,16 @@ export default class Todo extends Component {
   }
 
   componentWillMount() {
-    fetch("http://localhost:5500/todos", {
+    fetch(`${BASE_URL}/todos`, {
       headers: {
         Accept: "application/json"
       },
       method: "GET"
     })
       .then(res => res.json())
-      .then(console.log)
+      .then(data => {
+        this.setState({ todos: data });
+      })
       .catch(console.log);
   }
 
@@ -49,29 +53,21 @@ export default class Todo extends Component {
 
     if (newTodo.trim() === "") return;
 
-    // const todos = [
-    //   ...this.state.todos,
-    //   {
-    //     id: currentId + 1,
-    //     text: newTodo,
-    //     isComplete: false
-    //   }
-    // ];
-    // // console.warn(`${this.state.newTodo}`);
-    // this.setState({ todos, newTodo: "", currentId: currentId + 1 });
-    fetch({
-      url: "http://localhost:5500/todos",
+    fetch(`${BASE_URL}/todos`, {
       method: "post",
-
-      body: {
-        name: this.state.newTodo
-      },
+      body: JSON.stringify({
+        text: this.state.newTodo,
+        isComplete: false
+      }),
       headers: {
         "Content-Type": "application/json"
       }
     })
       .then(res => res.json())
-      .then(console.log)
+      .then(data => {
+        let todos = [...this.state.todos, data];
+        this.setState({ todos });
+      })
       .catch(console.log);
   };
 
