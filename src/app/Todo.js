@@ -19,12 +19,25 @@ export default class Todo extends Component {
     super();
     this.state = {
       todos: [
-        { id: 0, text: "Learn React Native", isComplete: true },
-        { id: 1, text: "Learn to style in React Native", isComplete: false }
+        // { id: 0, text: "Learn React Native", isComplete: true },
+        // { id: 1, text: "Learn to style in React Native", isComplete: false }
       ],
-      newTodo: "",
-      currentId: 1
+      newTodo: "" /* ,
+
+      currentId: 1 */
     };
+  }
+
+  componentWillMount() {
+    fetch("http://localhost:5500/todos", {
+      headers: {
+        Accept: "application/json"
+      },
+      method: "GET"
+    })
+      .then(res => res.json())
+      .then(console.log)
+      .catch(console.log);
   }
 
   handleChange = newTodo => {
@@ -36,16 +49,30 @@ export default class Todo extends Component {
 
     if (newTodo.trim() === "") return;
 
-    const todos = [
-      ...this.state.todos,
-      {
-        id: currentId + 1,
-        text: newTodo,
-        isComplete: false
+    // const todos = [
+    //   ...this.state.todos,
+    //   {
+    //     id: currentId + 1,
+    //     text: newTodo,
+    //     isComplete: false
+    //   }
+    // ];
+    // // console.warn(`${this.state.newTodo}`);
+    // this.setState({ todos, newTodo: "", currentId: currentId + 1 });
+    fetch({
+      url: "http://localhost:5500/todos",
+      method: "post",
+
+      body: {
+        name: this.state.newTodo
+      },
+      headers: {
+        "Content-Type": "application/json"
       }
-    ];
-    // console.warn(`${this.state.newTodo}`);
-    this.setState({ todos, newTodo: "", currentId: currentId + 1 });
+    })
+      .then(res => res.json())
+      .then(console.log)
+      .catch(console.log);
   };
 
   toggleTodo = id => {
