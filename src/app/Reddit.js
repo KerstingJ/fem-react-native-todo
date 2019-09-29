@@ -2,15 +2,12 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 
 // This file is just an example to show how to do API requests with react native
-export default props => {
-  const [posts, setPosts] = useState();
-
-  useEffect(() => {
-    fetch("https://www.reddit.com/.json")
-      .then(res => res.json())
-      .then(data => setPosts(data.data.children));
-  }, []);
-
+export default connect(
+  state => {
+    posts: state.reddit.posts;
+  },
+  {}
+)(props => {
   if (!posts) {
     return (
       <View style={styles.container}>
@@ -31,7 +28,7 @@ export default props => {
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

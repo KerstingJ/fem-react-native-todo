@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -11,106 +11,80 @@ import {
   TouchableOpacity,
   TouchableHighlight
 } from "react-native-gesture-handler";
+import { connect } from "react-redux";
 
-import { BASE_URL } from "../../config";
+import { getTodos, addTodo } from "./actions";
 
 let { height, width } = Dimensions.get("window");
 
-export default class Todo extends Component {
-  constructor() {
-    super();
-    this.state = {
-      todos: [
-        // { id: 0, text: "Learn React Native", isComplete: true },
-        // { id: 1, text: "Learn to style in React Native", isComplete: false }
-      ],
-      newTodo: "" /* ,
+const Todo = props => {
+  const [newTodo, setNewTodo] = useState("");
 
-      currentId: 1 */
-    };
-  }
+  useEffect(() => {
+    props.getTodos();
+  }, []);
 
-  componentWillMount() {
-    fetch(`${BASE_URL}/todos`, {
-      headers: {
-        Accept: "application/json"
-      },
-      method: "GET"
-    })
-      .then(res => res.json())
-      .then(data => {
-        this.setState({ todos: data });
-      })
-      .catch(console.log);
-  }
-
-  handleChange = newTodo => {
-    this.setState({ newTodo });
+  const handleChange = value => {
+    setNewTodo(value);
   };
 
-  handleSubmit = e => {
-    const { currentId, newTodo } = this.state;
-
+  const handleSubmit = e => {
     if (newTodo.trim() === "") return;
-
-    fetch(`${BASE_URL}/todos`, {
-      method: "post",
-      body: JSON.stringify({
-        text: this.state.newTodo,
-        isComplete: false
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    })
-      .then(res => res.json())
-      .then(data => {
-        let todos = [...this.state.todos, data];
-        this.setState({ todos });
-      })
-      .catch(console.log);
+    props.addTodo(newTodo.trim());
   };
 
-  toggleTodo = id => {
-    const todos = [...this.state.todos];
-    const index = todos.findIndex(item => item.id === id);
-    todos[index].isComplete = !todos[index].isComplete;
-    this.setState({ todos });
+  const toggleTodo = id => {
+    // const todos = [...props.todos];
+    // const index = todos.findIndex(item => item.id === id);
+    // todos[index].isComplete = !todos[index].isComplete;
+    // fetch(`${BASE_URL}/todos`)
+    //   .then(res => res.json())
+    //   .then(console.log)
+    //   .catch(console.log);
+    // setState({ todos });
   };
 
-  render() {
-    return (
-      <KeyboardAvoidingView style={styles.container} behavior={"height"}>
-        <View>
-          {this.state.todos.map(todo => (
-            <TouchableHighlight
-              key={todo.id}
-              onPress={() => this.toggleTodo(todo.id)}
-              underlayColor={"#aaffaa"}
+  return (
+    <KeyboardAvoidingView style={styles.container} behavior={"height"}>
+      <View>
+        {props.todos.map(todo => (
+          <TouchableHighlight
+            key={todo.id}
+            onPress={() => toggleTodo(todo.id)}
+            underlayColor={"#aaffaa"}
+          >
+            <Text
+              style={[styles.todo, todo.isComplete ? styles.completed : {}]}
             >
-              <Text
-                style={[styles.todo, todo.isComplete ? styles.completed : {}]}
-              >
-                {todo.text}
-              </Text>
-            </TouchableHighlight>
-          ))}
-        </View>
-        <View>
-          <TextInput
-            style={styles.input}
-            onChangeText={this.handleChange}
-            value={this.state.newTodo}
-            placeholder={"Add Todo..."}
-          />
-          <TouchableOpacity style={styles.button} onPress={this.handleSubmit}>
-            <Text style={styles.buttonText}>Confirm</Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    );
+              {todo.text}
+            </Text>
+          </TouchableHighlight>
+        ))}
+      </View>
+      <View>
+        <TextInput
+          style={styles.input}
+          onChangeText={handleChange}
+          value={newTodo}
+          placeholder={"Add Todo..."}
+        />
+        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+          <Text style={styles.buttonText}>Confirm</Text>
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+};
+
+export default connect(
+  state => ({
+    todos: state.todos.todos
+  }),
+  {
+    getTodos,
+    addTodo
   }
-}
+)(Todo);
 
 const styles = StyleSheet.create({
   container: {
